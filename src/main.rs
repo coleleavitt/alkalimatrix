@@ -1,14 +1,13 @@
+use ita_matrix::ItaClient;
 use ita_matrix::model::search::SearchRequest;
 use ita_matrix::model::summarize::SummarizeRequest;
-use ita_matrix::ItaClient;
 use tracing::info;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .init();
 
@@ -43,13 +42,13 @@ async fn main() -> anyhow::Result<()> {
         println!("{}", serde_json::to_string_pretty(&summarize_resp)?);
 
         if let Some(ref sol_list) = search_resp.solution_list
-            && let Some(first) = sol_list.solutions.first() {
-                info!("--- booking details ---");
-                let details_req =
-                    SummarizeRequest::booking_details(ss, sess, &first.id);
-                let details_resp = client.summarize(&details_req).await?;
-                println!("{}", serde_json::to_string_pretty(&details_resp)?);
-            }
+            && let Some(first) = sol_list.solutions.first()
+        {
+            info!("--- booking details ---");
+            let details_req = SummarizeRequest::booking_details(ss, sess, &first.id);
+            let details_resp = client.summarize(&details_req).await?;
+            println!("{}", serde_json::to_string_pretty(&details_resp)?);
+        }
     }
 
     Ok(())

@@ -43,9 +43,7 @@ impl ItaClient {
     pub async fn lookup_airport(&self, code: &str) -> Result<Location> {
         assert!(!code.is_empty(), "airport code must not be empty");
 
-        let path = format!(
-            "/v1/locationTypes/airportOrMultiAirportCity/locationCodes/{code}"
-        );
+        let path = format!("/v1/locationTypes/airportOrMultiAirportCity/locationCodes/{code}");
         self.transport.get(&path).await
     }
 
