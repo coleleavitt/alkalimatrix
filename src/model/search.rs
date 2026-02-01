@@ -339,9 +339,17 @@ impl SearchRequestBuilder {
         self
     }
 
+    pub fn routing(self, code: super::routing::RoutingCode) -> Self {
+        self.route_language(&code.build())
+    }
+
     pub fn command_line(mut self, cl: &str) -> Self {
         self.command_line = Some(cl.to_string());
         self
+    }
+
+    pub fn extension(self, code: super::routing::ExtensionCode) -> Self {
+        self.command_line(&code.build())
     }
 
     pub fn bg_program_response(mut self, token: &str) -> Self {
