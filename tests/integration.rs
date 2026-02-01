@@ -1,4 +1,5 @@
 use ita_matrix::ItaClient;
+use ita_matrix::model::routing::{ExtensionCode, RoutingCode};
 use ita_matrix::model::search::SearchRequest;
 use ita_matrix::model::summarize::SummarizeRequest;
 
@@ -218,4 +219,64 @@ async fn search_then_fare_rules() {
         "missing fareRules in response"
     );
     println!("{}", serde_json::to_string_pretty(&fare_resp).unwrap());
+}
+
+#[tokio::test]
+async fn search_with_routing_codes() {
+    init_tracing();
+
+    let req = SearchRequest::builder()
+        .origins(&["PHX"])
+        .destinations(&["LAX"])
+        .date("2026-02-15")
+        .routing(RoutingCode::new().nonstop())
+        .build();
+
+    let resp = client().search(&req).await.unwrap();
+
+    assert!(
+        resp.error.is_none(),
+        "search with routing code returned error: {:?}",
+        resp.error
+    );
+    assert!(resp.solution_set.is_some(), "missing solutionSet");
+    assert!(resp.session.is_some(), "missing session");
+
+    let sol_list = resp.solution_list.as_ref().expect("missing solutionList");
+    assert!(
+        !sol_list.solutions.is_empty(),
+        "no nonstop solutions found for PHX-LAX"
+    );
+
+    println!("Found {} nonstop solutions", sol_list.solutions.len());
+}
+
+#[tokio::test]
+async fn search_with_extension_codes() {
+    init_tracing();
+
+    let req = SearchRequest::builder()
+        .origins(&["PHX"])
+        .destinations(&["JFK"])
+        .date("2026-02-15")
+        .extension(ExtensionCode::new().max_stops(1).no_redeyes())
+        .build();
+
+    let resp = client().search(&req).await.unwrap();
+
+    assert!(
+        resp.error.is_none(),
+        "search with extension code returned error: {:?}",
+        resp.error
+    );
+    assert!(resp.solution_set.is_some(), "missing solutionSet");
+    assert!(resp.session.is_some(), "missing session");
+
+    let sol_list = resp.solution_list.as_ref().expect("missing solutionList");
+    assert!(
+        !sol_list.solutions.is_empty(),
+        "no solutions found for PHX-JFK with max 1 stop"
+    );
+
+    println!("Found {} solutions (max 1 stop, no redeyes)", sol_list.solutions.len());
 }
