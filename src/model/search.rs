@@ -19,6 +19,8 @@ pub struct Slice {
     pub selected: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub route_language: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub command_line: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -195,6 +197,7 @@ fn calendar_slice(origins: &[&str], destinations: &[&str], date: &str) -> Slice 
         filter: SliceFilter::default(),
         selected: false,
         route_language: None,
+        command_line: None,
     }
 }
 
@@ -228,6 +231,7 @@ struct SliceSpec {
     destinations: Vec<String>,
     date: String,
     route_language: Option<String>,
+    command_line: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -243,6 +247,7 @@ pub struct SearchRequestBuilder {
     change_of_airport: Option<bool>,
     check_availability: Option<bool>,
     route_language: Option<String>,
+    command_line: Option<String>,
     bg_program_response: Option<String>,
     sort: Option<String>,
 }
@@ -259,6 +264,7 @@ impl SearchRequestBuilder {
             destinations: destinations.iter().map(|s| s.to_string()).collect(),
             date: date.to_string(),
             route_language: None,
+            command_line: None,
         });
         self
     }
@@ -333,6 +339,11 @@ impl SearchRequestBuilder {
         self
     }
 
+    pub fn command_line(mut self, cl: &str) -> Self {
+        self.command_line = Some(cl.to_string());
+        self
+    }
+
     pub fn bg_program_response(mut self, token: &str) -> Self {
         self.bg_program_response = Some(token.to_string());
         self
@@ -359,6 +370,7 @@ impl SearchRequestBuilder {
                 filter: SliceFilter::default(),
                 selected: false,
                 route_language: self.route_language,
+                command_line: self.command_line,
             }]
         } else {
             self.slices
@@ -372,6 +384,7 @@ impl SearchRequestBuilder {
                     filter: SliceFilter::default(),
                     selected: false,
                     route_language: slice.route_language,
+                    command_line: slice.command_line,
                 })
                 .collect()
         };
